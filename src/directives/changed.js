@@ -15,14 +15,23 @@ angular.module('schemaForm').directive('sfChanged', function() {
       //"form" is really guaranteed to be here since the decorator directive
       //waits for it. But best be sure.
       if (form && form.onChange) {
-        ctrl.$viewChangeListeners.push(function() {
-          if (angular.isFunction(form.onChange)) {
-            form.onChange(ctrl.$modelValue, form);
-          } else {
-            scope.evalExpr(form.onChange, {'modelValue': ctrl.$modelValue, form: form});
-          }
-        });
-      }
+        if (form.type === 'array') {
+          scope.$watchCollection(function() { return ctrl.$viewValue; }, function() {
+            if (angular.isFunction(form.onChange)) {
+              form.onChange(ctrl.$modelValue, form);
+            } else {
+              scope.evalExpr(form.onChange, {'modelValue': ctrl.$modelValue, form: form});
+            }
+          });
+        } else {
+          ctrl.$viewChangeListeners.push(function () {
+            if (angular.isFunction(form.onChange)) {
+              form.onChange(ctrl.$modelValue, form);
+            } else {
+              scope.evalExpr(form.onChange, {'modelValue': ctrl.$modelValue, form: form});
+            }
+          });
+        }      }
     }
   };
 });
